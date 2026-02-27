@@ -7,57 +7,69 @@ namespace Aplicacion.Controllers
     [ApiController]
     public class PeliculasController : ControllerBase
     {
+        private readonly ILogger<PeliculasController> _log;
+
+        public PeliculasController(ILogger<PeliculasController> log)
+        {
+            _log = log;
+        }
+
         private List<Pelicula> pelicula = new List<Pelicula>
         {
             new Pelicula
             {
-                id = 1,
-                titulo = "Spider-Man",
-                director = "Sam Raimi",
-                genero = "Accion",
-                Duracion = "121 minutos",
+                Id = 1,
+                Titulo = "Spider-Man",
+                Director = "Sam Raimi",
+                Genero = "Accion",
+                DuracionMinutos = 121,
+                PrecioRecaudacion = 8,
                 FechaEstreno = DateOnly.Parse("2002-05-17"),
-                activo = true
+                Activa = true
             },
             new Pelicula
             {
-                id = 2,
-                titulo = "Avengers: Endgame",
-                director = "Anthony y Joe Russo",
-                genero = "Accion",
-                Duracion = "182 minutos",
+                Id = 2,
+                Titulo = "Avengers: Endgame",
+                Director = "Anthony y Joe Russo",
+                Genero = "Accion",
+                DuracionMinutos = 121,
+                 PrecioRecaudacion = 8,
                 FechaEstreno = DateOnly.Parse("2019-04-26"),
-                activo = true
+                Activa = true
             },
             new Pelicula
             {
-                id = 3,
-                titulo = "El curioso caso de Benjamin Button",
-                director = "David Fincher",
-                genero = "Drama",
-                Duracion = "168 minutos",
+                Id = 3,
+                Titulo = "El curioso caso de Benjamin Button",
+                Director = "David Fincher",
+                Genero = "Drama",
+                DuracionMinutos = 121,
+                 PrecioRecaudacion = 8,
                 FechaEstreno = DateOnly.Parse("2009-01-16"),
-                activo = true
+                Activa = true
             },
             new Pelicula
             {
-                id = 4,
-                titulo = "Perfume: la historia de un asesino",
-                director = "Tom Tykwer",
-                genero = "Ficción",
-                Duracion = "147 minutos",
+                Id = 4,
+                Titulo = "Perfume: la historia de un asesino",
+                Director = "Tom Tykwer",
+                Genero = "Ficción",
+                DuracionMinutos = 121,
+                 PrecioRecaudacion = 8,
                 FechaEstreno = DateOnly.Parse("2006-09-14"),
-                activo = true
+                Activa = true
             },
             new Pelicula
             {
-                id = 5,
-                titulo = "Un amor para recordar",
-                director = "Adam Shankman",
-                genero = "Romance",
-                Duracion = "101 minutos",
+                Id = 5,
+                Titulo = "Un amor para recordar",
+                Director = "Adam Shankman",
+                Genero = "Romance",
+                DuracionMinutos = 121,
+                PrecioRecaudacion = 8,
                 FechaEstreno = DateOnly.Parse("2002-06-21"),
-                activo = true
+                Activa = true
             }
         };
 
@@ -72,11 +84,11 @@ namespace Aplicacion.Controllers
         public IActionResult Get(bool Activo)
         {
             var lst = pelicula
-                .Where(c => c.activo == Activo)
+                .Where(c => c.Activa == Activo)
                 .Select(c => new
                 {
-                    c.titulo,
-                    c.director,
+                    c.Titulo,
+                    c.Director,
                     c.FechaEstreno
                 })
                 .ToList();
@@ -88,15 +100,34 @@ namespace Aplicacion.Controllers
         [HttpPost("Agregar")]
         public IActionResult Add(Pelicula nuevapelicula)
         {
-            pelicula.Add(nuevapelicula);
+            List<string> ListaErrores = new List<string>();
+            if (string.IsNullOrEmpty(nuevapelicula.Titulo))
+                ListaErrores.Add("El Director no puede estar vacio");
+            if (string.IsNullOrEmpty(nuevapelicula.Director))
+                ListaErrores.Add("El Director no puede estar vacio");
+            if (string.IsNullOrEmpty(nuevapelicula.Genero))
+                ListaErrores.Add("El Genero no puede estar vacio");
+            if (nuevapelicula.DuracionMinutos == 0)
+                ListaErrores.Add("La duración en minutos no puede estar vacio");
+            if (nuevapelicula.PrecioRecaudacion == 0)
+                ListaErrores.Add("El precio de recaudación no puede estar vacio");
 
-            return Ok(pelicula);
+            if (!ListaErrores.Any())
+            {
+                pelicula.Add(nuevapelicula);
+                return Ok(pelicula);
+                
+            }
+
+            _log.LogError("A ocurrido un error al agregar una pelicula " + string.Join(",", ListaErrores));
+
+            return BadRequest(ListaErrores);
         }
 
         [HttpDelete("Borrar")]
         public IActionResult Delete(int id)
         {
-            var PeliculaAborrar = pelicula.Where(c => c.id == id).FirstOrDefault();
+            var PeliculaAborrar = pelicula.Where(c => c.Id == id).FirstOrDefault();
 
             if (PeliculaAborrar == null)
             {
@@ -105,7 +136,7 @@ namespace Aplicacion.Controllers
 
             pelicula.Remove(PeliculaAborrar);
 
-            PeliculaAborrar.activo = false;
+            PeliculaAborrar.Activa = false;
 
             pelicula.Add(PeliculaAborrar);
 
@@ -116,20 +147,37 @@ namespace Aplicacion.Controllers
         [HttpPut("Actualizar")]
         public IActionResult Update(int id, Pelicula peliculaActualizada)
         {
-            var peliculaExistente = pelicula.FirstOrDefault(c => c.id == id);
+            List<string> ListaErrores = new List<string>();
+
+
+            var peliculaExistente = pelicula.FirstOrDefault(c => c.Id == id);
 
             if (peliculaExistente == null)
             {
                 return NotFound();
             }
 
+            if (string.IsNullOrEmpty(peliculaActualizada.Titulo))
+                ListaErrores.Add("El Director no puede estar vacio");
+            if (string.IsNullOrEmpty(peliculaActualizada.Director))
+                ListaErrores.Add("El Director no puede estar vacio");
+            if (string.IsNullOrEmpty(peliculaActualizada.Genero))
+                ListaErrores.Add("El Genero no puede estar vacio");
+            if (peliculaActualizada.DuracionMinutos == 0)
+                ListaErrores.Add("La duración en minutos no puede estar vacio");
+            if (peliculaActualizada.PrecioRecaudacion == 0)
+                ListaErrores.Add("El precio de recaudación no puede estar vacio");
+
+            if (ListaErrores.Any())
+            {
+                _log.LogError("A ocurrido un error al agregar una pelicula " + string.Join(",", ListaErrores));
+                return BadRequest(ListaErrores);
+            }
+
             // Actualizamos campos
-            peliculaExistente.titulo = peliculaActualizada.titulo;
-            peliculaExistente.director = peliculaActualizada.director;
-            peliculaExistente.genero = peliculaActualizada.genero;
-            peliculaExistente.Duracion = peliculaActualizada.Duracion;
-            peliculaExistente.FechaEstreno = peliculaActualizada.FechaEstreno;
-            peliculaExistente.activo = peliculaActualizada.activo;
+            peliculaExistente = peliculaActualizada;
+            peliculaExistente.Id = id;
+           
 
             return Ok(peliculaExistente);
         }
@@ -137,12 +185,17 @@ namespace Aplicacion.Controllers
 
     public class Pelicula
     {
-        public int id { get; set; }
-        public string titulo { get; set; }
-        public string director { get; set; }
-        public string genero { get; set; }
-        public string Duracion { get; set; }
+        public int Id { get; set; }
+        public required string Titulo { get; set; }
+        public required string Director { get; set; }
+        public string Genero { get; set; }
+        public int DuracionMinutos { get; set; }
+        public string DuracionString { get => DuracionMinutos.ToString() + " minutos."; }
+        public decimal PrecioRecaudacion { get; set; }
         public DateOnly FechaEstreno { get; set; }
-        public bool activo { get; set; }
+        public bool Activa { get; set; }
+
+        // Propiedad calculada
+        public int Antiguedad => DateTime.Now.Year - FechaEstreno.Year;
     }
 }

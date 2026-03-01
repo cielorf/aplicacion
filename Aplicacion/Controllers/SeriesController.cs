@@ -24,29 +24,11 @@ namespace Aplicacion.Controllers
                 AnioEstreno = 2008,
                 Genero = "Drama",
                 Activa = true,
-                TemporadasEpisodios = new List<(int, int)>
+                TemporadasEpisodios = new List<TemporadaInfo>
                 {
-                    (1, 7),
-                    (1, 13),
-                    (1, 13),
-                    (1, 13),
-                    (1, 16)
-                }
-            },
-            new Serie
-            {
-                Id = 2,
-                Titulo = "Stranger Things",
-                Plataforma = "Netflix",
-                AnioEstreno = 2016,
-                Genero = "Ciencia Ficción",
-                Activa = true,
-                TemporadasEpisodios = new List<(int, int)>
-                {
-                    (1, 8),
-                    (1, 9),
-                    (1, 8),
-                    (1, 9)
+                    new TemporadaInfo { Temporadas = 1, Episodios = 7 },
+                    new TemporadaInfo { Temporadas = 1, Episodios = 13 },
+                    new TemporadaInfo { Temporadas = 1, Episodios = 13 }
                 }
             }
         };
@@ -58,73 +40,67 @@ namespace Aplicacion.Controllers
             return Ok(serie);
         }
 
-        // Ver activos
-        [HttpGet("VerActivos")]
-        public IActionResult Get(bool Activo)
-        {
-            var lst = serie
-                .Where(s => s.Activa == Activo)
-                .Select(s => new
-                {
-                    s.Titulo,
-                    s.Plataforma,
-                    s.AnioEstreno
-                })
-                .ToList();
-
-            return Ok(lst);
-        }
-
         // Agregar
         [HttpPost("Agregar")]
         public IActionResult Add(Serie nuevaSerie)
         {
-            List<string> ListaErrores = new List<string>();
+            List<string> errores = new List<string>();
 
             if (string.IsNullOrEmpty(nuevaSerie.Titulo))
-                ListaErrores.Add("El Titulo no puede estar vacio");
+                errores.Add("El Titulo no puede estar vacio");
 
             if (string.IsNullOrEmpty(nuevaSerie.Plataforma))
-                ListaErrores.Add("La Plataforma no puede estar vacia");
+                errores.Add("La Plataforma no puede estar vacia");
 
             if (nuevaSerie.AnioEstreno == 0)
-                ListaErrores.Add("El Año de estreno no puede estar vacio");
+                errores.Add("El Año de estreno no puede estar vacio");
 
             if (string.IsNullOrEmpty(nuevaSerie.Genero))
-                ListaErrores.Add("El Genero no puede estar vacio");
+                errores.Add("El Genero no puede estar vacio");
 
-            if (nuevaSerie.TemporadasEpisodios == null || !nuevaSerie.TemporadasEpisodios.Any())
-                ListaErrores.Add("Debe tener al menos una temporada");
+            if (nuevaSerie.TemporadasEpisodios == null ||
+                !nuevaSerie.TemporadasEpisodios.Any())
+                errores.Add("Debe tener al menos una temporada");
 
-            if (!ListaErrores.Any())
+            if (nuevaSerie.TemporadasEpisodios != null)
             {
-                serie.Add(nuevaSerie);
-                return Ok(serie);
+                foreach (var temp in nuevaSerie.TemporadasEpisodios)
+                {
+                    if (temp.Temporadas <= 0)
+                        errores.Add("La temporada no puede ser 0");
+
+                    if (temp.Episodios <= 0)
+                        errores.Add("El episodio no puede ser 0");
+                }
             }
 
-            _log.LogError("Error al agregar serie: " + string.Join(",", ListaErrores));
-            return BadRequest(ListaErrores);
+            if (errores.Any())
+                return BadRequest(errores);
+
+            serie.Add(nuevaSerie);
+
+            return Ok("Serie agregada con éxito");
         }
 
-        // Borrar (desactivar)
-        [HttpDelete("Borrar")]
+        // Borrar
+        [HttpDelete("Borrar/{id}")]
         public IActionResult Delete(int id)
         {
             var serieABorrar = serie.FirstOrDefault(s => s.Id == id);
 
             if (serieABorrar == null)
-                return NotFound();
+                return BadRequest("La serie no existe");
 
             serieABorrar.Activa = false;
 
-            return Ok(serie);
+            return Ok("Serie eliminada con éxito");
         }
 
         // Actualizar
-        [HttpPut("Actualizar")]
+        [HttpPut("Actualizar/{id}")]
         public IActionResult Update(int id, Serie serieActualizada)
         {
-            List<string> ListaErrores = new List<string>();
+            List<string> errores = new List<string>();
 
             var serieExistente = serie.FirstOrDefault(s => s.Id == id);
 
@@ -132,22 +108,35 @@ namespace Aplicacion.Controllers
                 return NotFound();
 
             if (string.IsNullOrEmpty(serieActualizada.Titulo))
-                ListaErrores.Add("El Titulo no puede estar vacio");
+                errores.Add("El Titulo no puede estar vacio");
 
             if (string.IsNullOrEmpty(serieActualizada.Plataforma))
-                ListaErrores.Add("La Plataforma no puede estar vacia");
+                errores.Add("La Plataforma no puede estar vacia");
 
             if (serieActualizada.AnioEstreno == 0)
-                ListaErrores.Add("El Año de estreno no puede estar vacio");
+                errores.Add("El Año de estreno no puede estar vacio");
 
             if (string.IsNullOrEmpty(serieActualizada.Genero))
-                ListaErrores.Add("El Genero no puede estar vacio");
+                errores.Add("El Genero no puede estar vacio");
 
-            if (ListaErrores.Any())
+            if (serieActualizada.TemporadasEpisodios == null ||
+                !serieActualizada.TemporadasEpisodios.Any())
+                errores.Add("Debe tener al menos una temporada");
+
+            if (serieActualizada.TemporadasEpisodios != null)
             {
-                _log.LogError("Error al actualizar serie: " + string.Join(",", ListaErrores));
-                return BadRequest(ListaErrores);
+                foreach (var temp in serieActualizada.TemporadasEpisodios)
+                {
+                    if (temp.Temporadas <= 0)
+                        errores.Add("La temporada no puede ser 0");
+
+                    if (temp.Episodios <= 0)
+                        errores.Add("El episodio no puede ser 0");
+                }
             }
+
+            if (errores.Any())
+                return BadRequest(errores);
 
             // Actualizar campos correctamente
             serieExistente.Titulo = serieActualizada.Titulo;
@@ -157,29 +146,31 @@ namespace Aplicacion.Controllers
             serieExistente.TemporadasEpisodios = serieActualizada.TemporadasEpisodios;
             serieExistente.Activa = serieActualizada.Activa;
 
-            return Ok(serieExistente);
+            return Ok("Serie actualizada con éxito");
         }
     }
 
+    // Modelo Serie
     public class Serie
     {
         public int Id { get; set; }
         public required string Titulo { get; set; }
-        public string Plataforma { get; set; }
+        public required string Plataforma { get; set; }
         public int AnioEstreno { get; set; }
-
         public int Antiguedad => DateTime.Now.Year - AnioEstreno;
-
-        public string Genero { get; set; }
+        public required string Genero { get; set; }
         public bool Activa { get; set; }
-
-        public List<(int Temporadas, int Episodios)> TemporadasEpisodios { get; set; }
-
-        public int Temporadas => TemporadasEpisodios?.Sum(te => te.Temporadas) ?? 0;
-
-        public int Episodios => TemporadasEpisodios?.Sum(te => te.Episodios) ?? 0;
-
+        public List<TemporadaInfo> TemporadasEpisodios { get; set; } = new();
+        public int Temporadas => TemporadasEpisodios.Sum(t => t.Temporadas);
+        public int Episodios => TemporadasEpisodios.Sum(t => t.Episodios);
         public double PromedioEpisodiosPorTemporada =>
             Temporadas == 0 ? 0 : (double)Episodios / Temporadas;
+    }
+
+    // Clase auxiliar
+    public class TemporadaInfo
+    {
+        public int Temporadas { get; set; }
+        public int Episodios { get; set; }
     }
 }

@@ -102,7 +102,7 @@ namespace Aplicacion.Controllers
         {
             List<string> ListaErrores = new List<string>();
             if (string.IsNullOrEmpty(nuevapelicula.Titulo))
-                ListaErrores.Add("El Director no puede estar vacio");
+                ListaErrores.Add("El Titulo no puede estar vacio");
             if (string.IsNullOrEmpty(nuevapelicula.Director))
                 ListaErrores.Add("El Director no puede estar vacio");
             if (string.IsNullOrEmpty(nuevapelicula.Genero))
@@ -115,8 +115,8 @@ namespace Aplicacion.Controllers
             if (!ListaErrores.Any())
             {
                 pelicula.Add(nuevapelicula);
-                return Ok(pelicula);
-                
+                return Ok("Película agregada con éxito");
+
             }
 
             _log.LogError("A ocurrido un error al agregar una pelicula " + string.Join(",", ListaErrores));
@@ -127,11 +127,24 @@ namespace Aplicacion.Controllers
         [HttpDelete("Borrar")]
         public IActionResult Delete(int id)
         {
+            // Validar que el id no sea 0 o negativo
+            if (id <= 0)
+            {
+                return BadRequest("El id no puede ser 0 o negativo");
+            }
+
             var PeliculaAborrar = pelicula.Where(c => c.Id == id).FirstOrDefault();
 
+            // Validar que exista
             if (PeliculaAborrar == null)
             {
-                return NotFound();
+                return BadRequest("La pelicula no existe");
+            }
+
+            // Validar que no esté ya desactivada
+            if (!PeliculaAborrar.Activa)
+            {
+                return BadRequest("La pelicula ya está desactivada");
             }
 
             pelicula.Remove(PeliculaAborrar);
@@ -140,11 +153,11 @@ namespace Aplicacion.Controllers
 
             pelicula.Add(PeliculaAborrar);
 
-            return Ok(pelicula);
+            return Ok(pelicula.Where(p => p.Id == id).FirstOrDefault());
         }
 
         // Actualizar
-        [HttpPut("Actualizar")]
+        [HttpPut("Actualizar/{id}")]
         public IActionResult Update(int id, Pelicula peliculaActualizada)
         {
             List<string> ListaErrores = new List<string>();
@@ -158,7 +171,7 @@ namespace Aplicacion.Controllers
             }
 
             if (string.IsNullOrEmpty(peliculaActualizada.Titulo))
-                ListaErrores.Add("El Director no puede estar vacio");
+                ListaErrores.Add("El Titulo no puede estar vacio");
             if (string.IsNullOrEmpty(peliculaActualizada.Director))
                 ListaErrores.Add("El Director no puede estar vacio");
             if (string.IsNullOrEmpty(peliculaActualizada.Genero))

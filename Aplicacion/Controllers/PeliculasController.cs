@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Aplicacion.Models;
+﻿using Aplicacion.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Aplicacion.Controllers
 {
@@ -10,11 +11,7 @@ namespace Aplicacion.Controllers
     {
         private readonly ILogger<PeliculasController> _log;
 
-        public PeliculasController(ILogger<PeliculasController> log)
-        {
-            _log = log;
-        }
-
+        
         private List<Pelicula> pelicula = new List<Pelicula>
         {
             new Pelicula
@@ -74,10 +71,17 @@ namespace Aplicacion.Controllers
             }
         };
 
+        public PeliculasController(ILogger<PeliculasController> log)
+        {
+            _log = log;
+        }
+
+
         //Ver
         [HttpGet("VerTodos")]
         public IActionResult GetTodos()
         {
+            _log.LogInformation("Obteniendo todas las peliculas");
             return Ok(pelicula);
         }
 
@@ -101,6 +105,7 @@ namespace Aplicacion.Controllers
         [HttpPost("Agregar")]
         public IActionResult Add(Pelicula nuevapelicula)
         {
+            _log.LogInformation("Agregando una nueva pelicula");
             List<string> ListaErrores = new List<string>();
             if (string.IsNullOrEmpty(nuevapelicula.Titulo))
                 ListaErrores.Add("El Titulo no puede estar vacio");
@@ -115,6 +120,7 @@ namespace Aplicacion.Controllers
 
             if (!ListaErrores.Any())
             {
+                _log.LogWarning("Error al cargar la pelicula:{errores}", string.Join(", ", errores));
                 pelicula.Add(nuevapelicula);
                 return Ok("Película agregada con éxito");
 

@@ -10,10 +10,7 @@ namespace Aplicacion.Controllers
     {
         private readonly ILogger<SeriesController> _log;
 
-        public SeriesController(ILogger<SeriesController> log)
-        {
-            _log = log;
-        }
+       
 
         private List<Serie> serie = new List<Serie>
         {
@@ -34,10 +31,16 @@ namespace Aplicacion.Controllers
             }
         };
 
+        public SeriesController(ILogger<SeriesController> log)
+        {
+            _log = log;
+        }
+
         // Ver todos
         [HttpGet("VerTodos")]
         public IActionResult GetTodos()
         {
+            _log.LogInformation("Obteniendo todas las series");
             return Ok(serie);
         }
 
@@ -45,6 +48,7 @@ namespace Aplicacion.Controllers
         [HttpPost("Agregar")]
         public IActionResult Add(Serie nuevaSerie)
         {
+            _log.LogInformation("Agregando una nueva serie");
             List<string> errores = new List<string>();
 
             if (string.IsNullOrEmpty(nuevaSerie.Titulo))
@@ -76,10 +80,14 @@ namespace Aplicacion.Controllers
             }
 
             if (errores.Any())
+            {
+                _log.LogWarning("Error al cargar la serie:{errores}", string.Join(", ", errores));
                 return BadRequest(errores);
+            }
+                
 
             serie.Add(nuevaSerie);
-
+            _log.LogInformation("Agregando una nueva serie");
             return Ok("Serie agregada con éxito");
         }
 

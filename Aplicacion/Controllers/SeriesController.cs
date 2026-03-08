@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Aplicacion.Models;
-using System.Linq;
+
 
 namespace Aplicacion.Controllers
 {
@@ -9,8 +9,6 @@ namespace Aplicacion.Controllers
     public class SeriesController : ControllerBase
     {
         private readonly ILogger<SeriesController> _log;
-
-       
 
         private List<Serie> serie = new List<Serie>
         {
@@ -84,10 +82,10 @@ namespace Aplicacion.Controllers
                 _log.LogWarning("Error al cargar la serie:{errores}", string.Join(", ", errores));
                 return BadRequest(errores);
             }
-                
+
 
             serie.Add(nuevaSerie);
-            _log.LogInformation("Agregando una nueva serie");
+            _log.LogInformation("Serie agregada con exito:{Titulo}", nuevaSerie.Titulo);
             return Ok("Serie agregada con éxito");
         }
 
@@ -95,13 +93,18 @@ namespace Aplicacion.Controllers
         [HttpDelete("Borrar/{id}")]
         public IActionResult Delete(int id)
         {
+            _log.LogInformation("Eliiminando la serie con ID: {Id}", id);
             var serieABorrar = serie.FirstOrDefault(s => s.Id == id);
 
             if (serieABorrar == null)
+            {
+                _log.LogWarning("Serie con ID{Id} no encontrada para eliminar", id);
                 return BadRequest("La serie no existe");
+            }
+       
 
             serieABorrar.Activa = false;
-
+            _log.LogInformation("Serie eliminada con exito: {Titulo}", serieABorrar.Titulo);
             return Ok("Serie eliminada con éxito");
         }
 
@@ -109,6 +112,7 @@ namespace Aplicacion.Controllers
         [HttpPut("Actualizar/{id}")]
         public IActionResult Update(int id, Serie serieActualizada)
         {
+            _log.LogInformation("Actualizando la serie con ID: {Id}", id);
             List<string> errores = new List<string>();
 
             var serieExistente = serie.FirstOrDefault(s => s.Id == id);
@@ -145,7 +149,11 @@ namespace Aplicacion.Controllers
             }
 
             if (errores.Any())
+            {
+                _log.LogWarning("Error al cargar la serie:{errores}", string.Join(", ", errores));
                 return BadRequest(errores);
+            }
+               
 
             // Actualizar campos correctamente
             serieExistente.Titulo = serieActualizada.Titulo;
@@ -155,9 +163,11 @@ namespace Aplicacion.Controllers
             serieExistente.TemporadasEpisodios = serieActualizada.TemporadasEpisodios;
             serieExistente.Activa = serieActualizada.Activa;
 
+            _log.LogInformation("Serie agregada con exito:{Titulo}", serieExistente.Titulo);
+
             return Ok("Serie actualizada con éxito");
         }
     }
 
-    
+
 }

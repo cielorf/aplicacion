@@ -1,7 +1,6 @@
 ﻿using Aplicacion.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace Aplicacion.Controllers
 {
@@ -11,7 +10,7 @@ namespace Aplicacion.Controllers
     {
         private readonly ILogger<PeliculasController> _log;
 
-        
+
         private List<Pelicula> pelicula = new List<Pelicula>
         {
             new Pelicula
@@ -120,20 +119,23 @@ namespace Aplicacion.Controllers
 
             if (!ListaErrores.Any())
             {
-                _log.LogWarning("Error al cargar la pelicula:{errores}", string.Join(", ", errores));
-                pelicula.Add(nuevapelicula);
-                return Ok("Película agregada con éxito");
+                _log.LogWarning("Error al cargar la pelicula:{errores}", string.Join(", ", ListaErrores));
+                return BadRequest(ListaErrores);
+                
 
             }
+            pelicula.Add(nuevapelicula);
+            _log.LogInformation("Pelicula agregada con exito:{Titulo}", nuevapelicula.Titulo);
+            return Ok("Película agregada con éxito");
+           
 
-            _log.LogError("A ocurrido un error al agregar una pelicula " + string.Join(",", ListaErrores));
-
-            return BadRequest(ListaErrores);
+           
         }
 
         [HttpDelete("Borrar")]
         public IActionResult Delete(int id)
         {
+            _log.LogInformation("Eliiminando la pelicula con ID:{Id}", id);
             // Validar que el id no sea 0 o negativo
             if (id <= 0)
             {
@@ -151,15 +153,12 @@ namespace Aplicacion.Controllers
             // Validar que no esté ya desactivada
             if (!PeliculaAborrar.Activa)
             {
+                _log.LogWarning("Pelicula con ID{Id} no encontrada para eliminar", id);
                 return BadRequest("La pelicula ya está desactivada");
             }
 
-            pelicula.Remove(PeliculaAborrar);
-
             PeliculaAborrar.Activa = false;
-
-            pelicula.Add(PeliculaAborrar);
-
+            _log.LogInformation("Serie eliminada con exito: {Titulo}", PeliculaAborrar.Titulo);
             return Ok(pelicula.Where(p => p.Id == id).FirstOrDefault());
         }
 
@@ -167,6 +166,7 @@ namespace Aplicacion.Controllers
         [HttpPut("Actualizar/{id}")]
         public IActionResult Update(int id, Pelicula peliculaActualizada)
         {
+            _log.LogInformation("Actualizando la pelicula con ID: {Id}", id);
             List<string> ListaErrores = new List<string>();
 
 
@@ -197,11 +197,11 @@ namespace Aplicacion.Controllers
             // Actualizamos campos
             peliculaExistente = peliculaActualizada;
             peliculaExistente.Id = id;
-           
+
 
             return Ok(peliculaExistente);
         }
     }
 
-    
+
 }

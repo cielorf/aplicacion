@@ -1,6 +1,8 @@
-﻿using Aplicacion.Models;
+﻿
+using Backend.Data.Models;
+using Backend.Service;
 using Microsoft.AspNetCore.Mvc;
-
+using ROP.APIExtensions;
 
 namespace Aplicacion.Controllers
 {
@@ -9,199 +11,44 @@ namespace Aplicacion.Controllers
     public class PeliculasController : ControllerBase
     {
         private readonly ILogger<PeliculasController> _log;
+        private readonly PeliculasService _peliculasService;
 
-
-        private List<Pelicula> pelicula = new List<Pelicula>
+        public PeliculasController(PeliculasService peliculasService, ILogger<PeliculasController> log)
         {
-            new Pelicula
-            {
-                Id = 1,
-                Titulo = "Spider-Man",
-                Director = "Sam Raimi",
-                Genero = "Accion",
-                DuracionMinutos = 121,
-                PrecioRecaudacion = 8,
-                FechaEstreno = DateOnly.Parse("2002-05-17"),
-                Activa = true
-            },
-            new Pelicula
-            {
-                Id = 2,
-                Titulo = "Avengers: Endgame",
-                Director = "Anthony y Joe Russo",
-                Genero = "Accion",
-                DuracionMinutos = 121,
-                 PrecioRecaudacion = 8,
-                FechaEstreno = DateOnly.Parse("2019-04-26"),
-                Activa = true
-            },
-            new Pelicula
-            {
-                Id = 3,
-                Titulo = "El curioso caso de Benjamin Button",
-                Director = "David Fincher",
-                Genero = "Drama",
-                DuracionMinutos = 121,
-                 PrecioRecaudacion = 8,
-                FechaEstreno = DateOnly.Parse("2009-01-16"),
-                Activa = true
-            },
-            new Pelicula
-            {
-                Id = 4,
-                Titulo = "Perfume: la historia de un asesino",
-                Director = "Tom Tykwer",
-                Genero = "Ficción",
-                DuracionMinutos = 121,
-                 PrecioRecaudacion = 8,
-                FechaEstreno = DateOnly.Parse("2006-09-14"),
-                Activa = true
-            },
-            new Pelicula
-            {
-                Id = 5,
-                Titulo = "Un amor para recordar",
-                Director = "Adam Shankman",
-                Genero = "Romance",
-                DuracionMinutos = 121,
-                PrecioRecaudacion = 8,
-                FechaEstreno = DateOnly.Parse("2002-06-21"),
-                Activa = true
-            }
-        };
-
-        public PeliculasController(ILogger<PeliculasController> log)
-        {
+            _peliculasService = peliculasService;
             _log = log;
         }
 
-
-        //Ver
+        // Ver todas
         [HttpGet("VerTodos")]
         public IActionResult GetTodos()
         {
             _log.LogInformation("Obteniendo todas las peliculas");
-            return Ok(pelicula);
+            return _peliculasService.GetPeliculas().ToActionResult();
         }
 
-        [HttpGet("VerActivos")]
-        public IActionResult Get(bool Activo)
-        {
-            var lst = pelicula
-                .Where(c => c.Activa == Activo)
-                .Select(c => new
-                {
-                    c.Titulo,
-                    c.Director,
-                    c.FechaEstreno
-                })
-                .ToList();
-
-            return Ok(lst);
-        }
-
-        //Agregar
+        // Agregar
         [HttpPost("Agregar")]
-        public IActionResult Add(Pelicula nuevapelicula)
+        public IActionResult Add(Pelicula nuevaPelicula)
         {
             _log.LogInformation("Agregando una nueva pelicula");
-            List<string> ListaErrores = new List<string>();
-            if (string.IsNullOrEmpty(nuevapelicula.Titulo))
-                ListaErrores.Add("El Titulo no puede estar vacio");
-            if (string.IsNullOrEmpty(nuevapelicula.Director))
-                ListaErrores.Add("El Director no puede estar vacio");
-            if (string.IsNullOrEmpty(nuevapelicula.Genero))
-                ListaErrores.Add("El Genero no puede estar vacio");
-            if (nuevapelicula.DuracionMinutos == 0)
-                ListaErrores.Add("La duración en minutos no puede estar vacio");
-            if (nuevapelicula.PrecioRecaudacion == 0)
-                ListaErrores.Add("El precio de recaudación no puede estar vacio");
-
-            if (!ListaErrores.Any())
-            {
-                _log.LogWarning("Error al cargar la pelicula:{errores}", string.Join(", ", ListaErrores));
-                return BadRequest(ListaErrores);
-                
-
-            }
-            pelicula.Add(nuevapelicula);
-            _log.LogInformation("Pelicula agregada con exito:{Titulo}", nuevapelicula.Titulo);
-            return Ok("Película agregada con éxito");
-           
-
-           
+            return _peliculasService.AddPelicula(nuevaPelicula).ToActionResult();
         }
 
-        [HttpDelete("Borrar")]
-        public IActionResult Delete(int id)
+        // Borrar
+        [HttpDelete("Borrar/{id}")]
+        public IActionResult Delete(string id)
         {
-            _log.LogInformation("Eliiminando la pelicula con ID:{Id}", id);
-            // Validar que el id no sea 0 o negativo
-            if (id <= 0)
-            {
-                return BadRequest("El id no puede ser 0 o negativo");
-            }
-
-            var PeliculaAborrar = pelicula.Where(c => c.Id == id).FirstOrDefault();
-
-            // Validar que exista
-            if (PeliculaAborrar == null)
-            {
-                return BadRequest("La pelicula no existe");
-            }
-
-            // Validar que no esté ya desactivada
-            if (!PeliculaAborrar.Activa)
-            {
-                _log.LogWarning("Pelicula con ID{Id} no encontrada para eliminar", id);
-                return BadRequest("La pelicula ya está desactivada");
-            }
-
-            PeliculaAborrar.Activa = false;
-            _log.LogInformation("Serie eliminada con exito: {Titulo}", PeliculaAborrar.Titulo);
-            return Ok(pelicula.Where(p => p.Id == id).FirstOrDefault());
+            _log.LogInformation("Eliminando la pelicula con ID: {Id}", id);
+            return _peliculasService.DeletePelicula(id).ToActionResult();
         }
 
         // Actualizar
         [HttpPut("Actualizar/{id}")]
-        public IActionResult Update(int id, Pelicula peliculaActualizada)
+        public IActionResult Update(string id, Pelicula peliculaActualizada)
         {
             _log.LogInformation("Actualizando la pelicula con ID: {Id}", id);
-            List<string> ListaErrores = new List<string>();
-
-
-            var peliculaExistente = pelicula.FirstOrDefault(c => c.Id == id);
-
-            if (peliculaExistente == null)
-            {
-                return NotFound();
-            }
-
-            if (string.IsNullOrEmpty(peliculaActualizada.Titulo))
-                ListaErrores.Add("El Titulo no puede estar vacio");
-            if (string.IsNullOrEmpty(peliculaActualizada.Director))
-                ListaErrores.Add("El Director no puede estar vacio");
-            if (string.IsNullOrEmpty(peliculaActualizada.Genero))
-                ListaErrores.Add("El Genero no puede estar vacio");
-            if (peliculaActualizada.DuracionMinutos == 0)
-                ListaErrores.Add("La duración en minutos no puede estar vacio");
-            if (peliculaActualizada.PrecioRecaudacion == 0)
-                ListaErrores.Add("El precio de recaudación no puede estar vacio");
-
-            if (ListaErrores.Any())
-            {
-                _log.LogError("A ocurrido un error al agregar una pelicula " + string.Join(",", ListaErrores));
-                return BadRequest(ListaErrores);
-            }
-
-            // Actualizamos campos
-            peliculaExistente = peliculaActualizada;
-            peliculaExistente.Id = id;
-
-
-            return Ok(peliculaExistente);
+            return _peliculasService.UpdatePelicula(id, peliculaActualizada).ToActionResult();
         }
     }
-
-
 }

@@ -1,9 +1,14 @@
-﻿namespace Aplicacion.Models
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Backend.Data.Models
 {
     // Modelo Serie
     public class Serie
     {
-        public int Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         public required string Titulo { get; set; }
         public required string Plataforma { get; set; }
         public int AnioEstreno { get; set; }

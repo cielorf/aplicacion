@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Aplicacion.Models;
-
+﻿using Backend.Data.Models;
+using Backend.Service;
+using Microsoft.AspNetCore.Mvc;
+using ROP.APIExtensions;
 
 namespace Aplicacion.Controllers
 {
@@ -9,28 +10,11 @@ namespace Aplicacion.Controllers
     public class SeriesController : ControllerBase
     {
         private readonly ILogger<SeriesController> _log;
+        private readonly SeriesService _seriesService;
 
-        private List<Serie> serie = new List<Serie>
+        public SeriesController(SeriesService seriesService, ILogger<SeriesController> log)
         {
-            new Serie
-            {
-                Id = 1,
-                Titulo = "Breaking Bad",
-                Plataforma = "Netflix",
-                AnioEstreno = 2008,
-                Genero = "Drama",
-                Activa = true,
-                TemporadasEpisodios = new List<TemporadaInfo>
-                {
-                    new TemporadaInfo { Temporadas = 1, Episodios = 7 },
-                    new TemporadaInfo { Temporadas = 1, Episodios = 13 },
-                    new TemporadaInfo { Temporadas = 1, Episodios = 13 }
-                }
-            }
-        };
-
-        public SeriesController(ILogger<SeriesController> log)
-        {
+            _seriesService = seriesService;
             _log = log;
         }
 
@@ -39,7 +23,7 @@ namespace Aplicacion.Controllers
         public IActionResult GetTodos()
         {
             _log.LogInformation("Obteniendo todas las series");
-            return Ok(serie);
+            return _seriesService.GetSeries().ToActionResult();
         }
 
         // Agregar
@@ -47,127 +31,23 @@ namespace Aplicacion.Controllers
         public IActionResult Add(Serie nuevaSerie)
         {
             _log.LogInformation("Agregando una nueva serie");
-            List<string> errores = new List<string>();
-
-            if (string.IsNullOrEmpty(nuevaSerie.Titulo))
-                errores.Add("El Titulo no puede estar vacio");
-
-            if (string.IsNullOrEmpty(nuevaSerie.Plataforma))
-                errores.Add("La Plataforma no puede estar vacia");
-
-            if (nuevaSerie.AnioEstreno == 0)
-                errores.Add("El Año de estreno no puede estar vacio");
-
-            if (string.IsNullOrEmpty(nuevaSerie.Genero))
-                errores.Add("El Genero no puede estar vacio");
-
-            if (nuevaSerie.TemporadasEpisodios == null ||
-                !nuevaSerie.TemporadasEpisodios.Any())
-                errores.Add("Debe tener al menos una temporada");
-
-            if (nuevaSerie.TemporadasEpisodios != null)
-            {
-                foreach (var temp in nuevaSerie.TemporadasEpisodios)
-                {
-                    if (temp.Temporadas <= 0)
-                        errores.Add("La temporada no puede ser 0");
-
-                    if (temp.Episodios <= 0)
-                        errores.Add("El episodio no puede ser 0");
-                }
-            }
-
-            if (errores.Any())
-            {
-                _log.LogWarning("Error al cargar la serie:{errores}", string.Join(", ", errores));
-                return BadRequest(errores);
-            }
-
-
-            serie.Add(nuevaSerie);
-            _log.LogInformation("Serie agregada con exito:{Titulo}", nuevaSerie.Titulo);
-            return Ok("Serie agregada con éxito");
+            return _seriesService.AddSerie(nuevaSerie).ToActionResult();
         }
 
         // Borrar
         [HttpDelete("Borrar/{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
-            _log.LogInformation("Eliiminando la serie con ID: {Id}", id);
-            var serieABorrar = serie.FirstOrDefault(s => s.Id == id);
-
-            if (serieABorrar == null)
-            {
-                _log.LogWarning("Serie con ID{Id} no encontrada para eliminar", id);
-                return BadRequest("La serie no existe");
-            }
-       
-
-            serieABorrar.Activa = false;
-            _log.LogInformation("Serie eliminada con exito: {Titulo}", serieABorrar.Titulo);
-            return Ok("Serie eliminada con éxito");
+            _log.LogInformation("Eliminando la serie con ID: {Id}", id);
+            return _seriesService.DeleteSerie(id).ToActionResult();
         }
 
         // Actualizar
         [HttpPut("Actualizar/{id}")]
-        public IActionResult Update(int id, Serie serieActualizada)
+        public IActionResult Update(string id, Serie serieActualizada)
         {
             _log.LogInformation("Actualizando la serie con ID: {Id}", id);
-            List<string> errores = new List<string>();
-
-            var serieExistente = serie.FirstOrDefault(s => s.Id == id);
-
-            if (serieExistente == null)
-                return NotFound();
-
-            if (string.IsNullOrEmpty(serieActualizada.Titulo))
-                errores.Add("El Titulo no puede estar vacio");
-
-            if (string.IsNullOrEmpty(serieActualizada.Plataforma))
-                errores.Add("La Plataforma no puede estar vacia");
-
-            if (serieActualizada.AnioEstreno == 0)
-                errores.Add("El Año de estreno no puede estar vacio");
-
-            if (string.IsNullOrEmpty(serieActualizada.Genero))
-                errores.Add("El Genero no puede estar vacio");
-
-            if (serieActualizada.TemporadasEpisodios == null ||
-                !serieActualizada.TemporadasEpisodios.Any())
-                errores.Add("Debe tener al menos una temporada");
-
-            if (serieActualizada.TemporadasEpisodios != null)
-            {
-                foreach (var temp in serieActualizada.TemporadasEpisodios)
-                {
-                    if (temp.Temporadas <= 0)
-                        errores.Add("La temporada no puede ser 0");
-
-                    if (temp.Episodios <= 0)
-                        errores.Add("El episodio no puede ser 0");
-                }
-            }
-
-            if (errores.Any())
-            {
-                _log.LogWarning("Error al cargar la serie:{errores}", string.Join(", ", errores));
-                return BadRequest(errores);
-            }
-               
-
-            // Actualizar campos correctamente
-            serieExistente.Titulo = serieActualizada.Titulo;
-            serieExistente.Plataforma = serieActualizada.Plataforma;
-            serieExistente.AnioEstreno = serieActualizada.AnioEstreno;
-            serieExistente.Genero = serieActualizada.Genero;
-            serieExistente.TemporadasEpisodios = serieActualizada.TemporadasEpisodios;
-            serieExistente.Activa = serieActualizada.Activa;
-
-            _log.LogInformation("Serie agregada con exito:{Titulo}", serieExistente.Titulo);
-
-            return Ok("Serie actualizada con éxito");
+            return _seriesService.UpdateSerie(id, serieActualizada).ToActionResult();
         }
     }
-
-
 }

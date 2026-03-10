@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,6 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Backend.Data\Backend.Data.csproj" />
+    <ProjectReference Include="..\Backend.Dependencies\Backend.Dependencies.csproj" />
+    <ProjectReference Include="..\Backend.Service\Backend.Service.csproj" />
   </ItemGroup>
 
 </Project>

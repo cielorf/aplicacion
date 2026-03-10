@@ -1,8 +1,15 @@
-﻿namespace Aplicacion.Models
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Backend.Data.Models
+
 {
     public class Pelicula
     {
-        public int Id { get; set; }
+
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public required string Titulo { get; set; }
         public required string Director { get; set; }
         public string Genero { get; set; }

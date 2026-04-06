@@ -1,3 +1,4 @@
+/*
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace Aplicacion.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ClientesController : ControllerBase
+    public class ClientesControllerMongo : ControllerBase
     {
         private List<Cliente> clientes = new List<Cliente>
             {
@@ -150,3 +151,4 @@ namespace Aplicacion.Controllers
         public decimal Total { get; set; }
     }
 }
+*/

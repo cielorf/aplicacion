@@ -1,4 +1,5 @@
-﻿using Backend.Data.Models;
+﻿/*
+using Backend.Data.Models;
 using Backend.Service;
 using Microsoft.AspNetCore.Mvc;
 using ROP.APIExtensions;
@@ -10,9 +11,9 @@ namespace Aplicacion.Controllers
     public class SeriesController : ControllerBase
     {
         private readonly ILogger<SeriesController> _log;
-        private readonly SeriesService _seriesService;
+        private readonly SerieService _seriesService;
 
-        public SeriesController(SeriesService seriesService, ILogger<SeriesController> log)
+        public SeriesController(SerieService seriesService, ILogger<SeriesController> log)
         {
             _seriesService = seriesService;
             _log = log;
@@ -51,3 +52,5 @@ namespace Aplicacion.Controllers
         }
     }
 }
+
+*/

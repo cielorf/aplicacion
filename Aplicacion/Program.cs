@@ -1,7 +1,9 @@
 using Backend.Api;
+using Backend.Data.Models;
+using Backend.Data.Models.MSSQL;
 using Backend.Dependencies;
 using Backend.Service;
-using Backend.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Aplicacion
@@ -15,9 +17,17 @@ namespace Aplicacion
             builder.Services.AddControllers()
                 .AddNewtonsoftJson();
 
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddDbContext<BdenviusaContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Esto permite que coexistan Backend.Data.Models.Serie y Backend.Data.Models.MSSQL.Serie
+                options.CustomSchemaIds(type => type.FullName);
+            });
+
+            // Configuración de MongoDB
             builder.Services.Configure<MongoSettings>(
                 builder.Configuration.GetSection("MongoSettings"));
 
@@ -27,11 +37,13 @@ namespace Aplicacion
                 return new MongoDbContext(settings.ConnectionString, settings.DatabaseName);
             });
 
-            builder.Services.AddScoped<ISeriesDependencies, SeriesDependencies>();
-            builder.Services.AddScoped<SeriesService>();
+            // Inyección de Dependencias y Servicios de Series
+            //builder.Services.AddScoped<ISeriesDependenciesMongo, SeriesDependenciesMongo>();
+            //builder.Services.AddScoped<SeriesService>();
 
-            builder.Services.AddScoped<IPeliculasDependencies, PeliculasDependencies>();
-            builder.Services.AddScoped<PeliculasService>();
+            // Inyección de Dependencias y Servicios de Películas
+            builder.Services.AddScoped<IPeliculaDependencies, PeliculaDependencies>();
+            builder.Services.AddScoped<PeliculaService>();
 
             var app = builder.Build();
 

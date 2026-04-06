@@ -1,29 +1,26 @@
-﻿using Backend.Data.Models;
+﻿using Backend.Data.Models.MSSQL;
 using Microsoft.Extensions.Logging;
 using ROP;
 using System.Collections.Immutable;
 
+
 namespace Backend.Service
 {
-    public interface IPeliculasDependencies
+    public interface IPeliculaDependencies
     {
         Result<List<Pelicula>> GetPeliculas();
-
         Result<Pelicula> GetPeliculaById(string id);
-
         Result<bool> AddPelicula(Pelicula nuevaPelicula);
-
         Result<bool> UpdatePelicula(string id, Pelicula peliculaActualizada);
-
         Result<bool> DeletePelicula(string id);
     }
 
-    public class PeliculasService
+    public class PeliculaService
     {
-        private readonly IPeliculasDependencies _dependencies;
+        private readonly IPeliculaDependencies _dependencies;
         private readonly ILogger<PeliculasService> _log;
 
-        public PeliculasService(IPeliculasDependencies dependencies, ILogger<PeliculasService> log)
+        public PeliculaService(IPeliculaDependencies dependencies, ILogger<PeliculasService> log)
         {
             _dependencies = dependencies;
             _log = log;
@@ -62,16 +59,20 @@ namespace Backend.Service
             if (string.IsNullOrEmpty(nuevaPelicula.Director))
                 errores.Add(Error.Create("El director no puede estar vacio"));
 
-            // Genero
-            if (string.IsNullOrEmpty(nuevaPelicula.Genero))
-                errores.Add(Error.Create("El genero no puede estar vacio"));
-
             // Duración
-            if (nuevaPelicula.DuracionMinutos <= 0)
+            if (nuevaPelicula.Duracion <= 0)
                 errores.Add(Error.Create("La duración debe ser mayor a 0"));
 
+            // Resumen
+            if (string.IsNullOrEmpty(nuevaPelicula.Resumen))
+                errores.Add(Error.Create("El genero no puede estar vacio"));
+
+            // Poster
+            if (string.IsNullOrEmpty(nuevaPelicula.Poster))
+                errores.Add(Error.Create("El poster no puede estar vacio"));
+
             // Fecha estreno
-            if (nuevaPelicula.FechaEstreno > DateOnly.FromDateTime(DateTime.Now))
+            if (nuevaPelicula.AnioEstreno > DateTime.Now.Year)
                 errores.Add(Error.Create("La fecha de estreno no puede ser mayor a hoy"));
 
             if (errores.Any())

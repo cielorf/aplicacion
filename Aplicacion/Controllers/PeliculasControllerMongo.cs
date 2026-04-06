@@ -1,4 +1,4 @@
-﻿
+﻿/*
 using Backend.Data.Models;
 using Backend.Service;
 using Microsoft.AspNetCore.Mvc;
@@ -8,19 +8,19 @@ namespace Aplicacion.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class PeliculasController : ControllerBase
+    public class PeliculasControllerMongo : ControllerBase
     {
-        private readonly ILogger<PeliculasController> _log;
+        private readonly ILogger<PeliculasControllerMongo> _log;
         private readonly PeliculasService _peliculasService;
 
-        public PeliculasController(PeliculasService peliculasService, ILogger<PeliculasController> log)
+        public PeliculasControllerMongo(PeliculasService peliculasService, ILogger<PeliculasControllerMongo> log)
         {
             _peliculasService = peliculasService;
             _log = log;
         }
-
+        
         // Ver todas
-        [HttpGet("VerTodos")]
+        [HttpGet("VerTodosMongo")]
         public IActionResult GetTodos()
         {
             _log.LogInformation("Obteniendo todas las peliculas");
@@ -28,7 +28,7 @@ namespace Aplicacion.Controllers
         }
 
         // Agregar
-        [HttpPost("Agregar")]
+        [HttpPost("AgregarMongo")]
         public IActionResult Add(Pelicula nuevaPelicula)
         {
             _log.LogInformation("Agregando una nueva pelicula");
@@ -36,7 +36,7 @@ namespace Aplicacion.Controllers
         }
 
         // Borrar
-        [HttpDelete("Borrar/{id}")]
+        [HttpDelete("BorrarMongo/{id}")]
         public IActionResult Delete(string id)
         {
             _log.LogInformation("Eliminando la pelicula con ID: {Id}", id);
@@ -44,11 +44,13 @@ namespace Aplicacion.Controllers
         }
 
         // Actualizar
-        [HttpPut("Actualizar/{id}")]
+        [HttpPut("ActualizarMongo/{id}")]
         public IActionResult Update(string id, Pelicula peliculaActualizada)
         {
             _log.LogInformation("Actualizando la pelicula con ID: {Id}", id);
             return _peliculasService.UpdatePelicula(id, peliculaActualizada).ToActionResult();
         }
+        
     }
 }
+*/

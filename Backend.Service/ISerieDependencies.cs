@@ -1,40 +1,31 @@
-﻿using Backend.Data.Models;
+﻿using Backend.Data.Models.MSSQL;
 using Microsoft.Extensions.Logging;
 using ROP;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Backend.Service
 {
     public interface ISeriesDependencies
     {
         Result<List<Serie>> GetSeries();
-
         Result<Serie> GetSerieById(string id);
-
         Result<bool> AddSerie(Serie nuevaSerie);
-
         Result<bool> UpdateSerie(string id, Serie serieActualizada);
-
         Result<bool> DeleteSerie(string id);
     }
 
-    /// <summary>
-    /// Servicio de Series que maneja la lógica de negocio y validaciones.
-    /// Delegando las operaciones de datos a través de ISeriesDependencies.
-    /// </summary>
-    public class SeriesService
+    public class SerieService
     {
         private readonly ISeriesDependencies _dependencies;
-        private readonly ILogger<SeriesService> _log;
+        private readonly ILogger<SerieService> _log;
 
-        public SeriesService(ISeriesDependencies dependencies, ILogger<SeriesService> logs)
+        public SerieService(ISeriesDependencies dependencies, ILogger<SerieService> logs)
         {
             _dependencies = dependencies;
             _log = logs;
         }
 
-        public SeriesService(ISeriesDependencies dependencies)
+        public SerieService(ISeriesDependencies dependencies)
         {
             _dependencies = dependencies;
         }
@@ -67,30 +58,21 @@ namespace Backend.Service
             if (string.IsNullOrEmpty(nuevaSerie.Titulo))
                 errores.Add(Error.Create("El Titulo no puede estar vacio"));
 
-            if (string.IsNullOrEmpty(nuevaSerie.Plataforma))
-                errores.Add(Error.Create("La Plataforma no puede estar vacia"));
+            if (string.IsNullOrEmpty(nuevaSerie.Director))
+                errores.Add(Error.Create("El director no puede estar vacio"));
+
+            if (nuevaSerie.Duracion == 0)
+                errores.Add(Error.Create("La duracon no puede estar vacio"));
+
+            if (string.IsNullOrEmpty(nuevaSerie.Poster))
+                errores.Add(Error.Create("El Poster no puede estar vacio"));
+
 
             if (nuevaSerie.AnioEstreno == 0)
-                errores.Add(Error.Create("El Año de estreno no puede estar vacio"));
+                errores.Add(Error.Create("El año de estreno no puede estar vacio"));
 
-            if (string.IsNullOrEmpty(nuevaSerie.Genero))
-                errores.Add(Error.Create("El Genero no puede estar vacio"));
-
-            if (nuevaSerie.TemporadasEpisodios == null ||
-                !nuevaSerie.TemporadasEpisodios.Any())
-                errores.Add(Error.Create("Debe tener al menos una temporada"));
-
-            if (nuevaSerie.TemporadasEpisodios != null)
-            {
-                foreach (var temp in nuevaSerie.TemporadasEpisodios)
-                {
-                    if (temp.Temporadas <= 0)
-                        errores.Add(Error.Create("La temporada no puede ser 0"));
-
-                    if (temp.Episodios <= 0)
-                        errores.Add(Error.Create("El episodio no puede ser 0"));
-                }
-            }
+            if (string.IsNullOrEmpty(nuevaSerie.Plataforma))
+                errores.Add(Error.Create("La plataforma no puede estar vacia"));
 
             if (errores.Any())
             {

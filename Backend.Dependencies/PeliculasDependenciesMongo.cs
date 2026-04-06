@@ -1,4 +1,5 @@
-﻿using Backend.Data.Models;
+﻿
+using Backend.Data.Models;
 using Backend.Service;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -9,12 +10,12 @@ using System.Text;
 
 namespace Backend.Dependencies
 {
-    public class PeliculasDependencies : IPeliculasDependencies
+    public class PeliculasDependenciesMongo : IPeliculasDependenciesMongo
     {
-        private readonly ILogger<PeliculasDependencies> _log;
+        private readonly ILogger<PeliculasDependenciesMongo> _log;
         private readonly MongoDbContext _context;
 
-        public PeliculasDependencies(ILogger<PeliculasDependencies> log, MongoDbContext context)
+        public PeliculasDependenciesMongo(ILogger<PeliculasDependenciesMongo> log, MongoDbContext context)
         {
             _log = log;
             _context = context;
@@ -106,3 +107,4 @@ namespace Backend.Dependencies
         }
     }
 }
+

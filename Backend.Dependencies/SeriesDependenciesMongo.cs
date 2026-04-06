@@ -1,4 +1,5 @@
-﻿using Backend.Data.Models;
+﻿/*
+using Backend.Data.Models;
 using Backend.Service;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -6,12 +7,12 @@ using ROP;
 
 namespace Backend.Dependencies
 {
-    public class SeriesDependencies : ISeriesDependencies
+    public class SeriesDependenciesMongo : ISeriesDependenciesMongo
     {
-        private readonly ILogger<SeriesDependencies> _log;
+        private readonly ILogger<SeriesDependenciesMongo> _log;
         private readonly MongoDbContext _context;
 
-        public SeriesDependencies(ILogger<SeriesDependencies> log, MongoDbContext context)
+        public SeriesDependenciesMongo(ILogger<SeriesDependenciesMongo> log, MongoDbContext context)
         {
             _log = log;
             _context = context;
@@ -99,3 +100,5 @@ namespace Backend.Dependencies
         }
     }
 }
+
+*/

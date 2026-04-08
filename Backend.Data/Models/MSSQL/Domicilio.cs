@@ -22,5 +22,6 @@ public partial class Domicilio
     public byte Estado { get; set; }
 
     public short IdUsuario { get; set; }
-    public virtual Usuario? IdUsuarioNavigation { get; set; }
+
+    public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
 }

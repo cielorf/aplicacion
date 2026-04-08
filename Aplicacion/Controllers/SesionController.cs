@@ -28,7 +28,6 @@ namespace Backend.Api.Controllers
         {
             var sesiones = _context.Sesions
                 .Where(s => s.IdUsuario == idUsuario)
-                .OrderByDescending(s => s.FechaHora) // Las más recientes primero
                 .ToList();
 
             if (!sesiones.Any())
@@ -43,9 +42,8 @@ namespace Backend.Api.Controllers
         {
             try
             {
-                // Si no mandan fecha, el sistema asigna la actual automáticamente
-                if (sesion.FechaHora == default)
-                    sesion.FechaHora = DateTime.Now;
+               
+ 
 
                 _context.Sesions.Add(sesion);
                 _context.SaveChanges();
@@ -67,9 +65,6 @@ namespace Backend.Api.Controllers
 
             if (sesion == null)
                 return NotFound("No se encontró el registro de sesión");
-
-            // Aplicamos borrado lógico: 1 = Activo, 2 = Eliminado/Inactivo
-            sesion.Estado = 2;
 
             _context.SaveChanges();
             return Ok("La sesión ha sido marcada como eliminada");

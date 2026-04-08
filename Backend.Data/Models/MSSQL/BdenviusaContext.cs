@@ -34,12 +34,8 @@ public partial class BdenviusaContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-
-        }
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=enviusamex.com;Database=CieloPasantia;User=Cielo;Password=S9rkOjbbk4SnHP1C;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -298,11 +294,15 @@ public partial class BdenviusaContext : DbContext
             entity.ToTable("Sesion");
 
             entity.Property(e => e.IdSesion).HasColumnName("id_sesion");
-            entity.Property(e => e.Estado).HasColumnName("estado");
-            entity.Property(e => e.FechaHora)
-                .HasColumnType("datetime")
-                .HasColumnName("fechaHora");
+            entity.Property(e => e.Contraseña)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("contraseña");
             entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
+            entity.Property(e => e.Nickname)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("nickname");
 
             entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Sesions)
                 .HasForeignKey(d => d.IdUsuario)

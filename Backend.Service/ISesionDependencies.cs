@@ -54,13 +54,11 @@ namespace Backend.Service
             if (sesion.IdUsuario <= 0)
                 errores.Add(Error.Create("La sesión debe estar vinculada a un Usuario válido"));
 
-            // Validación de Fecha (No puede ser una fecha vacía/default)
-            if (sesion.FechaHora == default)
-                errores.Add(Error.Create("La fecha y hora de la sesión no es válida"));
+            if (string.IsNullOrWhiteSpace(sesion.Nickname))
+                errores.Add(Error.Create("El nickname es obligatorio para la sesión"));
 
-            // Validación de Estado (Generalmente 1 para activo/iniciado)
-            if (sesion.Estado <= 0)
-                errores.Add(Error.Create("El estado de la sesión debe ser especificado"));
+            if (string.IsNullOrWhiteSpace(sesion.Contraseña))
+                errores.Add(Error.Create("La contraseña no puede estar vacía"));
 
             if (errores.Any())
             {

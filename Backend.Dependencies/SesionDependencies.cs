@@ -21,7 +21,7 @@ namespace Backend.Dependencies
             try
             {
                 var sesiones = _context.Sesions
-                    .Where(s => s.Estado == 1)
+
                     .ToList();
 
                 return Result.Success(sesiones);
@@ -75,8 +75,8 @@ namespace Backend.Dependencies
                 if (sesion == null)
                     return Result.Failure<bool>(Error.Create("Sesión no encontrada para actualizar"));
 
-                sesion.FechaHora = sesionActualizada.FechaHora;
-                sesion.Estado = sesionActualizada.Estado;
+                sesion.Nickname = sesionActualizada.Nickname;
+                sesion.Contraseña = sesionActualizada.Contraseña;
                 sesion.IdUsuario = sesionActualizada.IdUsuario;
 
                 _context.SaveChanges();
@@ -98,8 +98,6 @@ namespace Backend.Dependencies
                 if (sesion == null)
                     return Result.Failure<bool>(Error.Create("El registro de sesión no existe"));
 
-                // Borrado lógico: Estado 2
-                sesion.Estado = 2;
                 _context.SaveChanges();
 
                 return Result.Success(true);

@@ -7,12 +7,11 @@ public partial class Sesion
 {
     public short IdSesion { get; set; }
 
-    public DateTime FechaHora { get; set; }
+    public string Nickname { get; set; } = null!;
 
-    public byte Estado { get; set; }
+    public string Contraseña { get; set; } = null!;
 
     public short IdUsuario { get; set; }
 
-  
     public virtual Usuario? IdUsuarioNavigation { get; set; }
 }

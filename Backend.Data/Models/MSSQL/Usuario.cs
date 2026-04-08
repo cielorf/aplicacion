@@ -19,12 +19,11 @@ public partial class Usuario
 
     public byte Estado { get; set; }
 
-
     public short IdRol { get; set; }
 
     public virtual Domicilio? Domicilio { get; set; }
 
-    public virtual Rol? IdRolNavigation { get; set; }
+    public virtual Rol IdRolNavigation { get; set; } = null!;
 
     public virtual ICollection<Sesion> Sesions { get; set; } = new List<Sesion>();
 }

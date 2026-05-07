@@ -23,11 +23,9 @@ namespace Aplicacion
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
-                // Esto permite que coexistan Backend.Data.Models.Serie y Backend.Data.Models.MSSQL.Serie
                 options.CustomSchemaIds(type => type.FullName);
             });
 
-            // Configuración de MongoDB
             builder.Services.Configure<MongoSettings>(
                 builder.Configuration.GetSection("MongoSettings"));
 
@@ -37,11 +35,17 @@ namespace Aplicacion
                 return new MongoDbContext(settings.ConnectionString, settings.DatabaseName);
             });
 
-            // Inyección de Dependencias y Servicios de Series
-            //builder.Services.AddScoped<ISeriesDependenciesMongo, SeriesDependenciesMongo>();
-            //builder.Services.AddScoped<SeriesService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("ReactPolicy", policy =>
+                {
+                    policy
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
-            // Inyección de Dependencias y Servicios de Películas
             builder.Services.AddScoped<IPeliculaDependencies, PeliculaDependencies>();
             builder.Services.AddScoped<PeliculaService>();
 
@@ -49,6 +53,12 @@ namespace Aplicacion
 
             app.UseSwagger();
             app.UseSwaggerUI();
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseCors("ReactPolicy");
 
             app.UseAuthorization();
 

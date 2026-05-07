@@ -23,7 +23,7 @@ public partial class Usuario
 
     public virtual Domicilio? Domicilio { get; set; }
 
-    public virtual Rol IdRolNavigation { get; set; } = null!;
+    public virtual Rol? IdRolNavigation { get; set; }
 
     public virtual ICollection<Sesion> Sesions { get; set; } = new List<Sesion>();
 }

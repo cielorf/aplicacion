@@ -42,8 +42,6 @@ namespace Backend.Api.Controllers
         {
             try
             {
-               
- 
 
                 _context.Sesions.Add(sesion);
                 _context.SaveChanges();
@@ -57,6 +55,24 @@ namespace Backend.Api.Controllers
             }
         }
 
+        [HttpPut("Editar/{id}")]
+        public IActionResult Editar(short id, [FromBody] Sesion sesionActualizada)
+        {
+            
+            if (id != sesionActualizada.IdSesion) return BadRequest("Los IDs no coinciden");
+
+            // 2. Buscar el registro original
+            var sesion = _context.Sesions.Find(id);
+            if (sesion == null) return NotFound();
+
+            // 3. Actualizar campos
+            sesion.Nickname = sesionActualizada.Nickname;
+            sesion.Contraseña = sesionActualizada.Contraseña;
+            sesion.IdUsuario = sesionActualizada.IdUsuario;
+
+            _context.SaveChanges();
+            return Ok("Registro actualizado");
+        }
 
         [HttpDelete("Eliminar/{id}")]
         public IActionResult Eliminar(short id)
@@ -66,8 +82,12 @@ namespace Backend.Api.Controllers
             if (sesion == null)
                 return NotFound("No se encontró el registro de sesión");
 
+            _context.Sesions.Remove(sesion);
+
             _context.SaveChanges();
-            return Ok("La sesión ha sido marcada como eliminada");
+            return Ok("La sesión ha sido eliminada exitosamente");
         }
+
+        
     }
 }

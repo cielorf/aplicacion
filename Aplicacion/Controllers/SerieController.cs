@@ -1,4 +1,5 @@
-﻿using Backend.Data.Models.MSSQL;
+﻿
+using Backend.Data.Models.MSSQL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Controllers
@@ -8,12 +9,16 @@ namespace Backend.Api.Controllers
     public class SerieController : ControllerBase
     {
         private readonly BdenviusaContext _context;
+        private readonly ILogger<SerieController> _log;
 
-        public SerieController(BdenviusaContext context)
+        public SerieController(BdenviusaContext context, ILogger<SerieController> log)
         {
             _context = context;
+            _log = log;
+
         }
 
+       
         [HttpGet("VerSeries")]
         public IActionResult VerSeries()
         {
@@ -24,9 +29,18 @@ namespace Backend.Api.Controllers
         [HttpPost("Agregar")]
         public IActionResult Agregar([FromBody] Serie serie)
         {
-            _context.Series.Add(serie);
-            _context.SaveChanges();
-            return Ok("Serie agregada correctamente");
+            try
+            {   _log.LogInformation("Agregando una nueva serie: {Titulo}", serie.Titulo);
+                _context.Series.Add(serie);
+                _context.SaveChanges();
+                _log.LogInformation("Serie agregada correctamente: {Titulo}", serie.Titulo);
+                return Ok("Serie agregada correctamente");
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Error al agregar la serie");
+                return StatusCode(500, "Error interno del servidor");
+            }
         }
 
         [HttpPut("Editar/{id}")]
